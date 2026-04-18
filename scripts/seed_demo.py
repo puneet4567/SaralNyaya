@@ -280,6 +280,124 @@ def seed_bulk_lawyers(total_lawyers: int, password: str) -> None:
         database.save_lawyer_profile(payload)
 
 
+def seed_demo_applicants(total_applicants: int, password: str) -> list[dict[str, object]]:
+    """Create extra applicants to make the demo feel "real" without manual entry."""
+    applicants: list[dict[str, object]] = []
+    for index in range(total_applicants):
+        first_name = FIRST_NAMES[(index * 5) % len(FIRST_NAMES)]
+        last_name = LAST_NAMES[(index * 7) % len(LAST_NAMES)]
+        full_name = f"{first_name} {last_name}"
+        email = f"applicant{index:03d}@saralnyaya.demo"
+        applicants.append(create_user(full_name, email, "applicant", password))
+    return applicants
+
+
+def seed_cases_and_documents(
+    *,
+    applicants: list[dict[str, object]],
+    total_cases: int,
+    total_documents: int,
+    assigned_cases: int,
+) -> None:
+    """Ensure the DB hits the requested demo totals (cases/docs/assignments)."""
+    existing_stats = database.get_overview_stats()
+    remaining_cases = max(0, total_cases - existing_stats["total_cases"])
+    remaining_docs = max(0, total_documents - existing_stats["total_documents"])
+    remaining_assigned = max(0, assigned_cases - existing_stats["assigned_cases"])
+
+    if remaining_cases == 0 and remaining_docs == 0 and remaining_assigned == 0:
+        return
+
+    # Every created case gets 1 document; some get an extra doc until we hit total_documents.
+    extra_docs_pool = max(0, remaining_docs - remaining_cases)
+    docs_left = remaining_docs
+    assigned_left = remaining_assigned
+
+    created_case_ids: list[int] = []
+
+    for index in range(remaining_cases):
+        applicant = applicants[index % len(applicants)]
+        state = STATES_AND_UTS[(index * 3) % len(STATES_AND_UTS)]
+        case_category = CASE_CATEGORIES[(index * 5) % len(CASE_CATEGORIES)]
+        court_level = COURT_CODES[(index * 7) % len(COURT_CODES)]
+        preferred_language = pick_languages_for_state(state)[0]
+        urgency = ["low", "medium", "high", "critical"][index % 4]
+        applicant_category = [
+            "low_income",
+            "woman_or_child",
+            "person_with_disability",
+            "industrial_workman",
+            "disaster_or_vulnerability",
+            "senior_citizen_or_other",
+            "not_sure",
+        ][index % 7]
+
+        summary = (
+            f"Need help for {case_category.lower()} in {state}. "
+            "Seeking guidance for next steps and document review."
+        )
+        payload = {
+            "applicant_user_id": applicant["id"],
+            "full_name": str(applicant.get("full_name", "")).strip() or "Applicant",
+            "contact_phone": f"9{(100000000 + index):09d}"[-10:],
+            "whatsapp_number": f"9{(200000000 + index):09d}"[-10:],
+            "state": state,
+            "district": f"District {1 + (index % 20)}",
+            "applicant_category": applicant_category,
+            "case_category": case_category,
+            "court_level": court_level,
+            "preferred_language": preferred_language,
+            "urgency": urgency,
+            "income_band": "Below Rs. 1.5 lakh / year" if applicant_category == "low_income" else "Prefer not to say",
+            "preferred_channel": "whatsapp" if index % 2 == 0 else "phone",
+            "summary": summary,
+            "permission_to_share": True,
+            "status": "new",
+            "case_stage": "intake_received",
+            "next_hearing_date": "",
+        }
+        doc_snippets = [
+            f"Facts summary: {summary}",
+            f"Key point: {case_category} details; requested support in {state}.",
+        ]
+        payload["feature_graph"] = build_case_feature_graph(payload, doc_snippets)
+        case_id = database.create_case(payload, source="web" if index % 2 == 0 else "whatsapp")
+        created_case_ids.append(case_id)
+
+        if assigned_left > 0:
+            candidates = database.list_lawyers(
+                state=state,
+                case_category=case_category,
+                court_level=court_level,
+                only_accepting=True,
+            )
+            if not candidates:
+                candidates = database.list_lawyers(state=state, only_accepting=True)
+            if candidates:
+                database.assign_lawyer(case_id, int(candidates[0]["id"]))
+                assigned_left -= 1
+
+        if docs_left > 0:
+            save_document(case_id, f"case-note-{case_id}.txt", doc_snippets[0].encode("utf-8"))
+            docs_left -= 1
+        if docs_left > 0 and extra_docs_pool > 0:
+            save_document(
+                case_id,
+                f"supporting-doc-{case_id}.txt",
+                doc_snippets[1].encode("utf-8"),
+            )
+            docs_left -= 1
+            extra_docs_pool -= 1
+
+    if assigned_left > 0:
+        fallback = database.list_lawyers(only_accepting=True)
+        for case_id in created_case_ids:
+            if assigned_left <= 0 or not fallback:
+                break
+            database.assign_lawyer(case_id, int(fallback[0]["id"]))
+            assigned_left -= 1
+
+
 def main() -> None:
     reset_storage()
     database.init_db()
@@ -412,8 +530,23 @@ def main() -> None:
         b"Aadhaar spelling mismatch affecting pension and ration card verification. Prior correction forms submitted.",
     )
 
+    extra_applicants = seed_demo_applicants(total_applicants=30, password=applicant_password)
+    seed_cases_and_documents(
+        applicants=[rekha, salim, *extra_applicants],
+        total_cases=100,
+        total_documents=150,
+        assigned_cases=50,
+    )
+
+    final_stats = database.get_overview_stats()
     print("Seeded SaralNyaya demo data.")
     print(f"Total lawyer profiles: {len(database.list_lawyers())}")
+    print(
+        "Stats:",
+        f"cases={final_stats['total_cases']},",
+        f"documents={final_stats['total_documents']},",
+        f"assigned={final_stats['assigned_cases']}",
+    )
     print("Admin: admin@saralnyaya.local / admin1234")
     print("Lawyer: kavya.demo@saralnyaya.local / password123")
     print("Lawyer: arjun.demo@saralnyaya.local / password123")

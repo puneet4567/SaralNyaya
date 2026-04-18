@@ -182,8 +182,8 @@ def layout(
         <div class="footer-brand">
           <img class="footer-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
           <div>
-            <strong>SaralNyaya</strong>
-            <p>Accessible legal help, simpler intake, and trusted lawyer matching for underserved communities.</p>
+          <strong>SaralNyaya</strong>
+          <p>Accessible legal help, simpler intake, and AI-powered document-aware lawyer matching for underserved communities.</p>
           </div>
         </div>
         <div>
@@ -198,6 +198,7 @@ def layout(
         <div class="footer-meta">
           <span>India-focused legal access portal</span>
           <span>Website + WhatsApp-ready intake</span>
+          <span>AI-powered matching</span>
         </div>
         <div class="footer-social">
           <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
@@ -224,7 +225,10 @@ def layout(
         <img class="brand-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
         <span class="brand-text">
           <span class="brand-mark">SaralNyaya</span>
-          <span class="brand-copy">Faster legal access for underserved communities</span>
+          <span class="brand-copy">
+            Faster legal access for underserved communities
+            <span class="ai-badge" title="AI-powered document-aware matching">AI-powered matching</span>
+          </span>
         </span>
       </a>
       <div class="site-nav-wrap">
@@ -387,7 +391,7 @@ def render_home(stats: dict[str, int], user: dict[str, Any] | None = None) -> st
           <a class="button secondary" href="/lawyers">Find lawyers</a>
         </div>
         <div class="info-strip">
-          Website intake, WhatsApp-ready intake, secure documents, and region-based lawyer discovery in one flow.
+          AI-powered matching uses the issue summary, uploaded documents, and lawyer practice history to route cases quickly.
         </div>
       </div>
       <aside class="hero-panel">
