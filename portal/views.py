@@ -183,7 +183,7 @@ def layout(
           <img class="footer-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
           <div>
           <strong>SaralNyaya</strong>
-          <p>Accessible legal help, simpler intake, and AI-powered document-aware lawyer matching for underserved communities.</p>
+          <p>Accessible legal help, simpler intake, and AI-powered document-aware lawyer matching for people who can’t afford legal aid.</p>
           </div>
         </div>
         <div>
@@ -226,7 +226,7 @@ def layout(
         <span class="brand-text">
           <span class="brand-mark">SaralNyaya</span>
           <span class="brand-copy">
-            Faster legal access for underserved communities
+            Faster legal access for people who can’t afford legal aid
             <span class="ai-badge" title="AI-powered document-aware matching">AI-powered matching</span>
           </span>
         </span>

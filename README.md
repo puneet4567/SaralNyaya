@@ -1,6 +1,6 @@
 # SaralNyaya MVP
 
-SaralNyaya is a simple, India-focused legal support portal for underserved communities. It borrows the useful ideas from the Department of Justice pro bono flow, but keeps the product much lighter: fewer steps, plain-language forms, document-aware auto-matching, and a public lawyer directory.
+SaralNyaya is a simple, India-focused legal support portal for people who can’t afford legal aid. It borrows useful ideas from the Department of Justice pro bono flow, but keeps the product much lighter: fewer steps, plain-language forms, document-aware auto-matching, and a public lawyer directory.
 
 This repository is a lightweight demo intended for quick iteration and a vanilla browser walkthrough.
 
