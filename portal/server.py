@@ -430,26 +430,48 @@ def build_dashboard_html(
     state = query_params.get("state", "").strip()
     case_category = query_params.get("case_category", "").strip()
     court_level = query_params.get("court_level", "").strip()
+    case_page = max(1, int(query_params.get("case_page", "1") or "1"))
+    lawyer_page = max(1, int(query_params.get("lawyer_page", "1") or "1"))
+    cases_per_page = 6
+    lawyers_per_page = 10
+
     cases = database.list_cases(
         state=state or None,
         case_category=case_category or None,
         court_level=court_level or None,
     )
-    attach_case_documents(cases)
     all_lawyers = database.list_lawyers(
         state=state or None,
         court_level=court_level or None,
     )
-    for case in cases:
+    total_case_results = len(cases)
+    total_case_pages = max(1, (total_case_results + cases_per_page - 1) // cases_per_page)
+    case_page = min(case_page, total_case_pages)
+    visible_cases = cases[(case_page - 1) * cases_per_page : case_page * cases_per_page]
+    attach_case_documents(visible_cases)
+    for case in visible_cases:
         case["matches"] = database.match_lawyers_for_case(case, all_lawyers)
+
+    total_lawyer_results = len(all_lawyers)
+    total_lawyer_pages = max(1, (total_lawyer_results + lawyers_per_page - 1) // lawyers_per_page)
+    lawyer_page = min(lawyer_page, total_lawyer_pages)
+    visible_lawyers = all_lawyers[
+        (lawyer_page - 1) * lawyers_per_page : lawyer_page * lawyers_per_page
+    ]
     stats = database.get_overview_stats()
     return render_dashboard(
         stats=stats,
-        cases=cases,
-        lawyers=all_lawyers,
+        cases=visible_cases,
+        lawyers=visible_lawyers,
         selected_state=state,
         selected_category=case_category,
         selected_court_level=court_level,
+        case_page=case_page,
+        case_total_pages=total_case_pages,
+        case_total_results=total_case_results,
+        lawyer_page=lawyer_page,
+        lawyer_total_pages=total_lawyer_pages,
+        lawyer_total_results=total_lawyer_results,
         success_messages=success_messages,
         user=user,
     )

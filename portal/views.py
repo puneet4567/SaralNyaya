@@ -108,10 +108,12 @@ def render_illustration_card(
     """
 
 
-def build_page_link(base_path: str, params: dict[str, Any], page: int) -> str:
+def build_page_link(
+    base_path: str, params: dict[str, Any], page: int, page_param: str = "page"
+) -> str:
     query_params = {key: value for key, value in params.items() if value}
     if page > 1:
-        query_params["page"] = page
+        query_params[page_param] = page
     return base_path + ("?" + urlencode(query_params) if query_params else "")
 
 
@@ -1070,9 +1072,76 @@ def render_dashboard(
     selected_state: str = "",
     selected_category: str = "",
     selected_court_level: str = "",
+    case_page: int = 1,
+    case_total_pages: int = 1,
+    case_total_results: int = 0,
+    lawyer_page: int = 1,
+    lawyer_total_pages: int = 1,
+    lawyer_total_results: int = 0,
     success_messages: list[str] | None = None,
     user: dict[str, Any] | None = None,
 ) -> str:
+    case_params = {
+        "state": selected_state,
+        "case_category": selected_category,
+        "court_level": selected_court_level,
+        "lawyer_page": lawyer_page,
+    }
+    lawyer_params = {
+        "state": selected_state,
+        "case_category": selected_category,
+        "court_level": selected_court_level,
+        "case_page": case_page,
+    }
+
+    def pagination_numbers(page: int, total_pages: int) -> list[int | str]:
+        numbers: list[int | str] = []
+        if total_pages <= 7:
+            return list(range(1, total_pages + 1))
+        numbers.extend([1, 2, 3] if page <= 3 else [1])
+        if page > 4:
+            numbers.append("...")
+        for page_number in range(max(2, page - 1), min(total_pages - 1, page + 1) + 1):
+            if page_number not in numbers:
+                numbers.append(page_number)
+        if page < total_pages - 3:
+            numbers.append("...")
+        if total_pages not in numbers:
+            numbers.append(total_pages)
+        return numbers
+
+    def render_pager(
+        *,
+        base_path: str,
+        params: dict[str, Any],
+        page: int,
+        total_pages: int,
+        total_results: int,
+        showing_count: int,
+        label: str,
+        page_param: str,
+    ) -> str:
+        if total_results <= 0:
+            return ""
+        page_links: list[str] = []
+        for item in pagination_numbers(page, total_pages):
+            if item == "...":
+                page_links.append('<span class="page-ellipsis">...</span>')
+                continue
+            page_links.append(
+                f'<a class="page-link{" active" if item == page else ""}" href="{build_page_link(base_path, params, int(item), page_param=page_param)}">{item}</a>'
+            )
+        return f"""
+        <section class="pagination-bar">
+          <p class="helper-text">Showing {showing_count} of {total_results} {text(label)}. Page {page} of {total_pages}.</p>
+          <div class="pagination-links">
+            <a class="page-link{" disabled" if page <= 1 else ""}" href="{build_page_link(base_path, params, max(1, page - 1), page_param=page_param)}">Previous</a>
+            {"".join(page_links)}
+            <a class="page-link{" disabled" if page >= total_pages else ""}" href="{build_page_link(base_path, params, min(total_pages, page + 1), page_param=page_param)}">Next</a>
+          </div>
+        </section>
+        """
+
     case_cards = "".join(
         render_case_overview_card(
             case,
@@ -1085,6 +1154,26 @@ def render_dashboard(
             progress_origin="dashboard",
         )
         for case in cases
+    )
+    case_pagination = render_pager(
+        base_path="/dashboard",
+        params=case_params,
+        page=case_page,
+        total_pages=case_total_pages,
+        total_results=case_total_results,
+        showing_count=len(cases),
+        label="cases",
+        page_param="case_page",
+    )
+    lawyer_pagination = render_pager(
+        base_path="/dashboard",
+        params=lawyer_params,
+        page=lawyer_page,
+        total_pages=lawyer_total_pages,
+        total_results=lawyer_total_results,
+        showing_count=len(lawyers),
+        label="lawyers",
+        page_param="lawyer_page",
     )
     body = f"""
     <section class="form-header">
@@ -1130,10 +1219,12 @@ def render_dashboard(
     <section class="dashboard-layout">
       <div class="case-list">
         <h2>Case queue</h2>
+        {case_pagination}
         {case_cards if case_cards else '<article class="empty-card">No cases match the current filters yet.</article>'}
       </div>
       <aside class="directory-column">
         <h2>Lawyer directory</h2>
+        {lawyer_pagination}
         {"".join(render_lawyer_card(lawyer, show_private_history=True) for lawyer in lawyers) if lawyers else '<article class="empty-card">No lawyers have been onboarded yet.</article>'}
       </aside>
     </section>
