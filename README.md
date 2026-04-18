@@ -4,6 +4,9 @@ SaralNyaya is a simple, India-focused legal support portal for people who can’
 
 This repository is a lightweight demo intended for quick iteration and a vanilla browser walkthrough.
 
+
+<img width="1089" height="976" alt="Screenshot 2026-04-18 at 3 47 42 PM" src="https://github.com/user-attachments/assets/cbbf2854-196b-4b5e-95a1-cb032891d2dc" />
+
 ## What this version includes
 
 - Eligibility guide inspired by legal-aid screening
