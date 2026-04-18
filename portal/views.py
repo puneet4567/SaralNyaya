@@ -168,6 +168,9 @@ def layout(
     user: dict[str, Any] | None = None,
     page_class: str = "",
 ) -> str:
+    page_classes = [page_class] if page_class else []
+    page_classes.append("authed-page" if user else "public-page")
+    header_class = "site-header authed-header" if user else "site-header public-header"
     nav_links = nav_links_for_user(user)
     nav = "".join(
         f'<a class="nav-link{" active" if current_path_matches(current_path, href) else ""}" href="{href}">{label}</a>'
@@ -190,8 +193,8 @@ def layout(
         </div>
         <div>
           <div class="footer-contact">
-            <span><strong>Address:</strong> 3rd Floor, Civic Support Centre, Barakhamba Road, New Delhi 110001</span>
-            <span><strong>Phone:</strong> +91 98765 43210</span>
+            <span><strong>Address:</strong> Barakhamba Road, New Delhi</span>
+            <span><strong>Phone:</strong> +91-9897672070</span>
             <span><strong>Email:</strong> hello@saralnyaya.org</span>
           </div>
         </div>
@@ -220,9 +223,9 @@ def layout(
   <title>{text(title)}</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="{text(page_class)}">
+<body class="{text(' '.join(page_classes))}">
   <div class="page-shell">
-    <header class="site-header">
+    <header class="{text(header_class)}">
       <a class="brand" href="/">
         <img class="brand-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
         <span class="brand-text">
@@ -315,6 +318,7 @@ def render_auth_page(
             "Separate workspaces, shared legal mission",
             "The portal stays simple for people using it while still protecting documents and assignments by role.",
             tone="sage",
+            compact=True,
         )}
       </div>
       <div>
