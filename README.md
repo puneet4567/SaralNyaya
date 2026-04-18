@@ -1,6 +1,6 @@
-# NyayaSetu MVP
+# SaralNyaya MVP
 
-NyayaSetu is a simple, India-focused legal support portal for underserved communities. It borrows the useful ideas from the Department of Justice pro bono flow, but keeps the product much lighter: fewer steps, plain-language forms, document-aware auto-matching, and a public lawyer directory.
+SaralNyaya is a simple, India-focused legal support portal for underserved communities. It borrows the useful ideas from the Department of Justice pro bono flow, but keeps the product much lighter: fewer steps, plain-language forms, document-aware auto-matching, and a public lawyer directory.
 
 ## What this version includes
 
@@ -68,7 +68,7 @@ Uploaded files are stored in `uploads/`.
 
 On local startup, the app creates a default admin if one does not already exist:
 
-- Email: `admin@nyayasetu.local`
+- Email: `admin@saralnyaya.local`
 - Password: `admin1234`
 
 You can override those with `LAW_PORTAL_ADMIN_EMAIL`, `LAW_PORTAL_ADMIN_PASSWORD`, and `LAW_PORTAL_ADMIN_NAME`.

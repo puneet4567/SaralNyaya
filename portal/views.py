@@ -159,7 +159,7 @@ def layout(
   <div class="page-shell">
     <header class="site-header">
       <a class="brand" href="/">
-        <span class="brand-mark">NyayaSetu</span>
+        <span class="brand-mark">SaralNyaya</span>
         <span class="brand-copy">Faster legal access for underserved communities</span>
       </a>
       <div class="site-nav-wrap">
@@ -356,7 +356,7 @@ def render_home(stats: dict[str, int], user: dict[str, Any] | None = None) -> st
       </article>
     </section>
     """
-    return layout("NyayaSetu", body, "/", user=user)
+    return layout("SaralNyaya", body, "/", user=user)
 
 
 def render_eligibility_guide(user: dict[str, Any] | None = None) -> str:

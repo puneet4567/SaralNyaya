@@ -175,7 +175,7 @@ class PortalTests(unittest.TestCase):
         status, _headers, body = self.call_app("GET", "/")
 
         self.assertEqual(status, "200 OK")
-        self.assertIn(b"NyayaSetu", body)
+        self.assertIn(b"SaralNyaya", body)
         self.assertIn(b"secure", body.lower())
 
     def test_dashboard_requires_login(self) -> None:

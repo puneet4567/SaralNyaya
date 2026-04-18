@@ -46,9 +46,9 @@ def upload_root() -> Path:
 
 
 def ensure_default_admin() -> None:
-    admin_email = os.environ.get("LAW_PORTAL_ADMIN_EMAIL", "admin@nyayasetu.local")
+    admin_email = os.environ.get("LAW_PORTAL_ADMIN_EMAIL", "admin@saralnyaya.local")
     admin_password = os.environ.get("LAW_PORTAL_ADMIN_PASSWORD", "admin1234")
-    admin_name = os.environ.get("LAW_PORTAL_ADMIN_NAME", "NyayaSetu Admin")
+    admin_name = os.environ.get("LAW_PORTAL_ADMIN_NAME", "SaralNyaya Admin")
     if database.get_user_by_email(admin_email):
         return
     database.create_user(
@@ -886,5 +886,5 @@ def run_dev_server() -> None:
     host = os.environ.get("LAW_PORTAL_HOST", "127.0.0.1")
     port = int(os.environ.get("LAW_PORTAL_PORT", "8000"))
     with make_server(host, port, application) as server:
-        print(f"NyayaSetu running on http://{host}:{port}")
+        print(f"SaralNyaya running on http://{host}:{port}")
         server.serve_forever()

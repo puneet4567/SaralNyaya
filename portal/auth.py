@@ -7,7 +7,7 @@ from http.cookies import SimpleCookie
 
 
 PBKDF2_ITERATIONS = 200_000
-SESSION_COOKIE_NAME = "nyayasetu_session"
+SESSION_COOKIE_NAME = "saralnyaya_session"
 
 
 def hash_password(password: str) -> str:
