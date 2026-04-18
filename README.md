@@ -2,6 +2,8 @@
 
 SaralNyaya is a simple, India-focused legal support portal for underserved communities. It borrows the useful ideas from the Department of Justice pro bono flow, but keeps the product much lighter: fewer steps, plain-language forms, document-aware auto-matching, and a public lawyer directory.
 
+This repository is a lightweight demo intended for quick iteration and a vanilla browser walkthrough.
+
 ## What this version includes
 
 - Eligibility guide inspired by legal-aid screening
@@ -29,17 +31,44 @@ SaralNyaya is a simple, India-focused legal support portal for underserved commu
 
 ## Run locally
 
-1. Use the existing virtual environment or any Python 3.14+ environment.
-2. Start the app:
+### 1) Start the server (empty DB)
+
+Use the existing virtual environment (recommended) or any Python 3.14+ environment.
+
+Start the app:
 
 ```bash
 ./.venv/bin/python app.py
 ```
 
-3. Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Open `http://127.0.0.1:8000`
 
 The SQLite database is created automatically at `data/portal.db`.
 Uploaded files are stored in `uploads/`.
+
+### 2) Seed demo data (recommended for demo / video)
+
+This creates a realistic demo dataset:
+
+- 1000 lawyer profiles across Indian states/UTs
+- 100 cases submitted
+- 150 documents stored
+- 50 assigned matters (auto-assigned using the built-in matching logic)
+
+Run:
+
+```bash
+./.venv/bin/python scripts/seed_demo.py
+./.venv/bin/python app.py
+```
+
+Demo accounts:
+
+- Admin: `admin@saralnyaya.local` / `admin1234`
+- Lawyer: `kavya.demo@saralnyaya.local` / `password123`
+- Lawyer: `arjun.demo@saralnyaya.local` / `password123`
+- Applicant: `rekha.demo@saralnyaya.local` / `password123`
+- Applicant: `salim.demo@saralnyaya.local` / `password123`
 
 ## Pages
 
@@ -56,6 +85,15 @@ Uploaded files are stored in `uploads/`.
 - `/documents/<id>` secure file download endpoint
 - `/whatsapp` WhatsApp workflow guide
 - `/api/whatsapp/intake` programmatic intake endpoint
+
+## Vanilla flow (quick demo script)
+
+1. Home: confirm the platform overview and the stats row (cases / lawyers / documents / assigned).
+2. Find lawyers: filter by State + Category, expand a lawyer card, and open their profile.
+3. Applicant signup: create an applicant account.
+4. Submit a case: fill the intake form, upload a document, and consent to share with a lawyer.
+5. Dashboard: see the auto-match result and the reasons.
+6. Lawyer login: review assigned matters and download shared documents (permissioned access).
 
 ## Product assumptions in this MVP
 
