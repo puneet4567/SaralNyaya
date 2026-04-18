@@ -459,6 +459,8 @@ def build_lawyer_directory_html(
     query_params: dict[str, str],
     user: dict[str, Any] | None = None,
 ) -> str:
+    page = max(1, int(query_params.get("page", "1") or "1"))
+    per_page = 24
     state = query_params.get("state", "").strip()
     bar_council_state = query_params.get("bar_council_state", "").strip()
     case_category = query_params.get("case_category", "").strip()
@@ -471,13 +473,22 @@ def build_lawyer_directory_html(
         query=query or None,
         bar_council_state=bar_council_state or None,
     )
+    total_results = len(lawyers)
+    total_pages = max(1, (total_results + per_page - 1) // per_page)
+    page = min(page, total_pages)
+    start_index = (page - 1) * per_page
+    end_index = start_index + per_page
+    visible_lawyers = lawyers[start_index:end_index]
     return render_lawyer_directory(
-        lawyers=lawyers,
+        lawyers=visible_lawyers,
         selected_state=state,
         selected_bar_council_state=bar_council_state,
         selected_category=case_category,
         selected_court_level=court_level,
         query=query,
+        page=page,
+        total_pages=total_pages,
+        total_results=total_results,
         user=user,
     )
 

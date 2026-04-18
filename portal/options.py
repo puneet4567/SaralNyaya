@@ -37,7 +37,7 @@ STATES_AND_UTS = [
     "Puducherry",
 ]
 
-LAWYER_STATE_OPTIONS = ["Pan-India", *STATES_AND_UTS]
+LAWYER_STATE_OPTIONS = STATES_AND_UTS
 
 BAR_COUNCIL_OPTIONS = [
     "Andhra Pradesh",
@@ -144,29 +144,25 @@ CASE_STAGE_OPTIONS = [
 ]
 
 ELIGIBILITY_OPTIONS = [
-    ("scheduled_caste", "Scheduled Caste"),
-    ("scheduled_tribe", "Scheduled Tribe"),
+    ("low_income", "Underprivileged / low income"),
     ("trafficking_or_begar", "Victim of trafficking or begar"),
     ("woman_or_child", "Woman or child"),
     ("person_with_disability", "Person with disability"),
     ("person_in_custody", "Person in custody"),
     ("industrial_workman", "Industrial workman"),
-    ("disaster_or_caste_atrocity", "Victim of disaster, ethnic violence, or caste atrocity"),
-    ("low_income", "Low income / BPL / income certificate"),
+    ("disaster_or_vulnerability", "Disaster-affected or otherwise vulnerable"),
     ("senior_citizen_or_other", "Senior citizen or other eligible group"),
     ("not_sure", "Not sure, need help checking eligibility"),
 ]
 
 ELIGIBILITY_PROOF_HINTS = {
-    "scheduled_caste": "Scheduled Caste certificate",
-    "scheduled_tribe": "Scheduled Tribe certificate",
+    "low_income": "Income certificate, BPL card, or any document showing financial hardship",
     "trafficking_or_begar": "Court, police, or legal document showing this status",
     "woman_or_child": "Government ID showing age or gender where relevant",
     "person_with_disability": "Disability certificate",
     "person_in_custody": "Court order or custody documents",
     "industrial_workman": "Employment ID or work certificate",
-    "disaster_or_caste_atrocity": "Government or legal document showing the incident/status",
-    "low_income": "Income certificate or BPL card",
+    "disaster_or_vulnerability": "Government record, medical note, or other document showing hardship or vulnerability",
     "senior_citizen_or_other": "Government ID or other supporting document",
     "not_sure": "No proof needed right now; the platform can help screen eligibility later",
 }

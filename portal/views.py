@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from html import escape
 from typing import Any
+from urllib.parse import urlencode
 
 from portal.options import (
     BAR_COUNCIL_OPTIONS,
@@ -93,9 +94,10 @@ def render_illustration_card(
     title: str,
     caption: str,
     tone: str = "sage",
+    compact: bool = False,
 ) -> str:
     return f"""
-    <aside class="illustration-card tone-{text(tone)}">
+    <aside class="illustration-card tone-{text(tone)}{" compact" if compact else ""}">
       <img class="illustration-image" src="{text(image_path)}" alt="{text(title)}">
       <div class="illustration-copy">
         <p class="eyebrow">Portal flow</p>
@@ -104,6 +106,13 @@ def render_illustration_card(
       </div>
     </aside>
     """
+
+
+def build_page_link(base_path: str, params: dict[str, Any], page: int) -> str:
+    query_params = {key: value for key, value in params.items() if value}
+    if page > 1:
+        query_params["page"] = page
+    return base_path + ("?" + urlencode(query_params) if query_params else "")
 
 
 def nav_links_for_user(user: dict[str, Any] | None) -> list[tuple[str, str]]:
@@ -145,6 +154,8 @@ def nav_links_for_user(user: dict[str, Any] | None) -> list[tuple[str, str]]:
 def current_path_matches(current_path: str, href: str) -> bool:
     if href == "/":
         return current_path == "/"
+    if "?" in href:
+        return current_path == href
     return current_path.startswith(href.split("?", 1)[0])
 
 
@@ -153,6 +164,7 @@ def layout(
     body: str,
     current_path: str,
     user: dict[str, Any] | None = None,
+    page_class: str = "",
 ) -> str:
     nav_links = nav_links_for_user(user)
     nav = "".join(
@@ -164,6 +176,38 @@ def layout(
         if user
         else ""
     )
+    brand_footer = """
+    <footer class="site-footer">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <img class="footer-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
+          <div>
+            <strong>SaralNyaya</strong>
+            <p>Accessible legal help, simpler intake, and trusted lawyer matching for underserved communities.</p>
+          </div>
+        </div>
+        <div>
+          <div class="footer-contact">
+            <span><strong>Address:</strong> 3rd Floor, Civic Support Centre, Barakhamba Road, New Delhi 110001</span>
+            <span><strong>Phone:</strong> +91 98765 43210</span>
+            <span><strong>Email:</strong> hello@saralnyaya.org</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-side">
+        <div class="footer-meta">
+          <span>India-focused legal access portal</span>
+          <span>Website + WhatsApp-ready intake</span>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="https://x.com" target="_blank" rel="noreferrer">X</a>
+          <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="https://www.youtube.com" target="_blank" rel="noreferrer">YouTube</a>
+        </div>
+      </div>
+    </footer>
+    """
 
     return f"""<!doctype html>
 <html lang="en">
@@ -173,12 +217,15 @@ def layout(
   <title>{text(title)}</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="{text(page_class)}">
   <div class="page-shell">
     <header class="site-header">
       <a class="brand" href="/">
-        <span class="brand-mark">SaralNyaya</span>
-        <span class="brand-copy">Faster legal access for underserved communities</span>
+        <img class="brand-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya logo">
+        <span class="brand-text">
+          <span class="brand-mark">SaralNyaya</span>
+          <span class="brand-copy">Faster legal access for underserved communities</span>
+        </span>
       </a>
       <div class="site-nav-wrap">
         <nav class="site-nav">{nav}</nav>
@@ -186,6 +233,7 @@ def layout(
       </div>
     </header>
     <main>{body}</main>
+    {brand_footer}
   </div>
 </body>
 </html>
@@ -286,7 +334,10 @@ def render_auth_page(
       </div>
     </section>
     """
-    return layout(title, body, f"/{mode}", user=user)
+    current_path = f"/{mode}"
+    if mode == "register" and role:
+        current_path = f"/register?role={role}"
+    return layout(title, body, current_path, user=user)
 
 
 def render_access_denied(
@@ -319,10 +370,16 @@ def render_home(stats: dict[str, int], user: dict[str, Any] | None = None) -> st
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">India-focused legal aid portal</p>
-        <h1>Securely match applicants and lawyers using issue text, prior documents, and practice history.</h1>
+        <div class="brand-banner">
+          <img class="brand-banner-logo" src="/static/saralnyaya-mark.svg" alt="SaralNyaya symbol">
+          <div>
+            <strong>SaralNyaya</strong>
+            <span>Simple legal access for people who need support most</span>
+          </div>
+        </div>
+        <h1>Simple legal help matching for people who cannot easily afford it.</h1>
         <p class="lead">
-          Applicants can upload past case papers. Lawyers can add their profile and past case history.
-          Access to those documents is then restricted by role, ownership, and assignment.
+          Applicants submit the issue and documents once. Lawyers onboard with practice history. SaralNyaya handles secure matching and access.
         </p>
         <div class="hero-actions">
           {primary_cta}
@@ -330,63 +387,44 @@ def render_home(stats: dict[str, int], user: dict[str, Any] | None = None) -> st
           <a class="button secondary" href="/lawyers">Find lawyers</a>
         </div>
         <div class="info-strip">
-          This keeps the product simple for users while adding the security layer needed for real document sharing.
+          Website intake, WhatsApp-ready intake, secure documents, and region-based lawyer discovery in one flow.
         </div>
       </div>
       <aside class="hero-panel">
         {render_illustration_card(
-            "/static/community-justice.svg",
-            "People, advocates, and the system connected in one place",
-            "A warmer first screen for applicants, lawyers, and admins handling sensitive court matters.",
+            "/static/saralnyaya-mark.svg",
+            "A bridge between people and legal help",
+            "The mark combines balance and support to reflect accessible legal aid, careful matching, and trust.",
             tone="terracotta",
         )}
-        <div class="stat-card">
-          <span class="stat-value">{stats["total_cases"]}</span>
-          <span class="stat-label">cases submitted</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{stats["total_lawyers"]}</span>
-          <span class="stat-label">lawyer profiles</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{stats["total_documents"]}</span>
-          <span class="stat-label">documents stored</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{stats["assigned_cases"]}</span>
-          <span class="stat-label">assigned matters</span>
+        <div class="stats-row" aria-label="Portal stats">
+          <div class="stat-chip">
+            <span class="stat-value">{stats["total_cases"]}</span>
+            <span class="stat-label">cases submitted</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-value">{stats["total_lawyers"]}</span>
+            <span class="stat-label">lawyer profiles</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-value">{stats["total_documents"]}</span>
+            <span class="stat-label">documents stored</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-value">{stats["assigned_cases"]}</span>
+            <span class="stat-label">assigned matters</span>
+          </div>
         </div>
       </aside>
     </section>
 
-    <section class="spotlight-grid">
-      <article class="card">
-        <h2>Applicants</h2>
-        <ul class="plain-list">
-          <li>Create an account and keep your case papers private.</li>
-          <li>Submit the issue and upload previous case documents.</li>
-          <li>Track your case stage in one simple workspace.</li>
-        </ul>
-      </article>
-      <article class="card">
-        <h2>Lawyers</h2>
-        <ul class="plain-list">
-          <li>Build a feature-rich profile with courts, specialties, and past case history.</li>
-          <li>See only the matters assigned to you.</li>
-          <li>Download only the documents you are authorized to access.</li>
-        </ul>
-      </article>
-      <article class="card">
-        <h2>Admins</h2>
-        <ul class="plain-list">
-          <li>Review the full queue and matching reasons.</li>
-          <li>Assign lawyers and monitor progress.</li>
-          <li>Control document visibility through assignment.</li>
-        </ul>
-      </article>
+    <section class="home-highlights" aria-label="How SaralNyaya works">
+      <div class="highlight-pill"><strong>Applicants:</strong> submit issue + documents once.</div>
+      <div class="highlight-pill"><strong>Lawyers:</strong> onboard with courts + past experience.</div>
+      <div class="highlight-pill"><strong>Admins:</strong> oversee matches + secure access.</div>
     </section>
     """
-    return layout("SaralNyaya", body, "/", user=user)
+    return layout("SaralNyaya", body, "/", user=user, page_class="home-page")
 
 
 def render_eligibility_guide(user: dict[str, Any] | None = None) -> str:
@@ -407,13 +445,10 @@ def render_eligibility_guide(user: dict[str, Any] | None = None) -> str:
         This keeps the legal-aid screening logic visible without turning the submission into a government-style maze.
       </p>
     </section>
+    <section class="info-strip directory-note">
+      Use this as a quick screening aid. If someone is clearly underprivileged or vulnerable but unsure which category fits best, choose `Not sure` and continue.
+    </section>
     <section class="two-column">
-      {render_illustration_card(
-          "/static/document-match.svg",
-          "Documents and issue summaries make triage simpler",
-          "Even a notice, FIR copy, order sheet, or agreement can improve matching without making the process feel bureaucratic.",
-          tone="sand",
-      )}
       <article class="card">
         <h2>Use it as guidance</h2>
         <ul class="plain-list">
@@ -737,6 +772,11 @@ def render_lawyer_card(lawyer: dict[str, Any], show_private_history: bool = Fals
         if show_private_history and history_preview
         else ""
     )
+    compact_meta = [
+        lawyer.get("bar_council_state") or "Bar council not set",
+        f'{lawyer["years_experience"]} years',
+        lawyer["fee_model"].replace("_", " "),
+    ]
     return f"""
     <article class="lawyer-card">
       <div class="card-head">
@@ -751,19 +791,26 @@ def render_lawyer_card(lawyer: dict[str, Any], show_private_history: bool = Fals
           <span class="mini-pill">{text(lawyer.get("verification_status", "self_attested").replace("_", " "))}</span>
         </div>
       </div>
-      <p>{text(lawyer["bio"] or "No profile summary added yet.")}</p>
-      {history_block}
-      <div class="meta-grid">
-        <span>Bar Council: {text(lawyer.get("bar_council_state") or "Not set")}</span>
-        <span>Enrollment: {text(lawyer["bar_council_id"])}</span>
-        <span>{text(lawyer["years_experience"])} years</span>
-        <span>{text(lawyer["fee_model"].replace("_", " "))}</span>
+      <p class="compact-summary">{text(lawyer["bio"] or "No profile summary added yet.")}</p>
+      <div class="compact-meta">
+        {"".join(f'<span class="mini-pill">{text(item)}</span>' for item in compact_meta)}
       </div>
-      {render_label_list("States served", lawyer["states_served"])}
-      {render_label_list("Specialties", lawyer["specialties"])}
-      {render_label_list("Courts of practice", [COURT_LEVEL_LABELS.get(item, item) for item in lawyer["courts_of_practice"]])}
-      {render_label_list("Languages", lawyer["languages"])}
-      {render_label_list("Feature tags", tags, empty_label="Generated after onboarding")}
+      <div class="compact-tags">{render_badges(lawyer["specialties"][:3], empty_label="No specialties")}</div>
+      <details class="card-details">
+        <summary>View full profile</summary>
+        {history_block}
+        <div class="meta-grid">
+          <span>Bar Council: {text(lawyer.get("bar_council_state") or "Not set")}</span>
+          <span>Enrollment: {text(lawyer["bar_council_id"])}</span>
+          <span>{text(lawyer["years_experience"])} years</span>
+          <span>{text(lawyer["fee_model"].replace("_", " "))}</span>
+        </div>
+        {render_label_list("States served", lawyer["states_served"])}
+        {render_label_list("Specialties", lawyer["specialties"])}
+        {render_label_list("Courts of practice", [COURT_LEVEL_LABELS.get(item, item) for item in lawyer["courts_of_practice"]])}
+        {render_label_list("Languages", lawyer["languages"])}
+        {render_label_list("Feature tags", tags, empty_label="Generated after onboarding")}
+      </details>
     </article>
     """
 
@@ -775,8 +822,55 @@ def render_lawyer_directory(
     selected_category: str = "",
     selected_court_level: str = "",
     query: str = "",
+    page: int = 1,
+    total_pages: int = 1,
+    total_results: int = 0,
     user: dict[str, Any] | None = None,
 ) -> str:
+    page_params = {
+        "q": query,
+        "state": selected_state,
+        "bar_council_state": selected_bar_council_state,
+        "case_category": selected_category,
+        "court_level": selected_court_level,
+    }
+    page_numbers: list[int | str] = []
+    if total_pages <= 7:
+        page_numbers = list(range(1, total_pages + 1))
+    else:
+        page_numbers.extend([1, 2, 3] if page <= 3 else [1])
+        if page > 4:
+            page_numbers.append("...")
+        for page_number in range(max(2, page - 1), min(total_pages - 1, page + 1) + 1):
+            if page_number not in page_numbers:
+                page_numbers.append(page_number)
+        if page < total_pages - 3:
+            page_numbers.append("...")
+        if total_pages not in page_numbers:
+            page_numbers.append(total_pages)
+
+    page_links = []
+    for item in page_numbers:
+        if item == "...":
+            page_links.append('<span class="page-ellipsis">...</span>')
+            continue
+        page_links.append(
+            f'<a class="page-link{" active" if item == page else ""}" href="{build_page_link("/lawyers", page_params, item)}">{item}</a>'
+        )
+    pagination = (
+        f"""
+        <section class="pagination-bar">
+          <p class="helper-text">Showing {len(lawyers)} of {total_results} lawyers. Page {page} of {total_pages}.</p>
+          <div class="pagination-links">
+            <a class="page-link{" disabled" if page <= 1 else ""}" href="{build_page_link("/lawyers", page_params, max(1, page - 1))}">Previous</a>
+            {"".join(page_links)}
+            <a class="page-link{" disabled" if page >= total_pages else ""}" href="{build_page_link("/lawyers", page_params, min(total_pages, page + 1))}">Next</a>
+          </div>
+        </section>
+        """
+        if total_results
+        else ""
+    )
     body = f"""
     <section class="form-header">
       <p class="eyebrow">Lawyer directory</p>
@@ -785,21 +879,8 @@ def render_lawyer_directory(
         Public discovery stays open, but confidential case documents remain protected behind account and role checks.
       </p>
     </section>
-    <section class="two-column media-section">
-      {render_illustration_card(
-          "/static/community-justice.svg",
-          "Regional discovery without the portal feeling heavy",
-          "People can browse by state, bar council, issue type, and court before the platform handles deeper matching.",
-          tone="terracotta",
-      )}
-      <article class="card">
-        <h2>Directory filters that matter</h2>
-        <ul class="plain-list">
-          <li>State served and bar council registration</li>
-          <li>Practice area and court/forum level</li>
-          <li>Public profile summary and availability</li>
-        </ul>
-      </article>
+    <section class="info-strip directory-note">
+      Filter by state, bar council, issue type, and court to quickly narrow the list. Open any lawyer card only when you want the full profile.
     </section>
     <section class="filter-card">
       <form class="filter-grid" method="get" action="/lawyers">
@@ -837,9 +918,11 @@ def render_lawyer_directory(
         </div>
       </form>
     </section>
+    {pagination}
     <section class="directory-grid">
       {"".join(render_lawyer_card(lawyer) for lawyer in lawyers) if lawyers else '<article class="empty-card">No lawyers match the current filters yet.</article>'}
     </section>
+    {pagination}
     """
     return layout("Find lawyers", body, "/lawyers", user=user)
 

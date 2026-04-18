@@ -524,7 +524,7 @@ def list_lawyers(
     for lawyer in lawyers:
         if only_accepting and not lawyer["is_accepting"]:
             continue
-        if state and state not in lawyer["states_served"] and "Pan-India" not in lawyer["states_served"]:
+        if state and state not in lawyer["states_served"]:
             continue
         if court_level and court_level not in lawyer["courts_of_practice"]:
             continue
@@ -700,9 +700,6 @@ def match_lawyers_for_case(
         if case_record["state"] in lawyer["states_served"]:
             score += 50
             reasons.append(f"Serves {case_record['state']}")
-        elif "Pan-India" in lawyer["states_served"]:
-            score += 30
-            reasons.append("Supports cases across multiple states")
         else:
             continue
 
