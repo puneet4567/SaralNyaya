@@ -221,6 +221,8 @@ def serve_static(path: str) -> tuple[str, list[tuple[str, str]], list[bytes]]:
     content_type = "text/plain; charset=utf-8"
     if file_path.suffix == ".css":
         content_type = "text/css; charset=utf-8"
+    elif file_path.suffix == ".svg":
+        content_type = "image/svg+xml"
 
     payload = file_path.read_bytes()
     return ("200 OK", response_headers(content_type, payload), [payload])

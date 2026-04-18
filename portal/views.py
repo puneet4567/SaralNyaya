@@ -88,6 +88,24 @@ def render_label_list(title: str, items: list[str], empty_label: str = "Not prov
     """
 
 
+def render_illustration_card(
+    image_path: str,
+    title: str,
+    caption: str,
+    tone: str = "sage",
+) -> str:
+    return f"""
+    <aside class="illustration-card tone-{text(tone)}">
+      <img class="illustration-image" src="{text(image_path)}" alt="{text(title)}">
+      <div class="illustration-copy">
+        <p class="eyebrow">Portal flow</p>
+        <h3>{text(title)}</h3>
+        <p>{text(caption)}</p>
+      </div>
+    </aside>
+    """
+
+
 def nav_links_for_user(user: dict[str, Any] | None) -> list[tuple[str, str]]:
     if not user:
         return [
@@ -238,6 +256,12 @@ def render_auth_page(
           <li>Lawyers can see only assigned matters and approved files.</li>
           <li>Admins can manage the full matching workflow.</li>
         </ul>
+        {render_illustration_card(
+            "/static/lawyer-network.svg",
+            "Separate workspaces, shared legal mission",
+            "The portal stays simple for people using it while still protecting documents and assignments by role.",
+            tone="sage",
+        )}
       </div>
       <div>
         {render_messages(errors, "error")}
@@ -310,6 +334,12 @@ def render_home(stats: dict[str, int], user: dict[str, Any] | None = None) -> st
         </div>
       </div>
       <aside class="hero-panel">
+        {render_illustration_card(
+            "/static/community-justice.svg",
+            "People, advocates, and the system connected in one place",
+            "A warmer first screen for applicants, lawyers, and admins handling sensitive court matters.",
+            tone="terracotta",
+        )}
         <div class="stat-card">
           <span class="stat-value">{stats["total_cases"]}</span>
           <span class="stat-label">cases submitted</span>
@@ -378,6 +408,12 @@ def render_eligibility_guide(user: dict[str, Any] | None = None) -> str:
       </p>
     </section>
     <section class="two-column">
+      {render_illustration_card(
+          "/static/document-match.svg",
+          "Documents and issue summaries make triage simpler",
+          "Even a notice, FIR copy, order sheet, or agreement can improve matching without making the process feel bureaucratic.",
+          tone="sand",
+      )}
       <article class="card">
         <h2>Use it as guidance</h2>
         <ul class="plain-list">
@@ -430,6 +466,23 @@ def render_case_form(
     </section>
     {render_messages(success_message, "success")}
     {render_messages(errors, "error")}
+    <section class="two-column media-section">
+      {render_illustration_card(
+          "/static/document-match.svg",
+          "Upload papers that explain the dispute",
+          "Past notices, orders, salary records, petitions, rent papers, or FIR copies help the matcher understand the case faster.",
+          tone="sand",
+      )}
+      <article class="card">
+        <h2>What the matcher looks at</h2>
+        <ul class="plain-list">
+          <li>The issue summary in plain language</li>
+          <li>The state, court, language, and urgency</li>
+          <li>The text extracted from uploaded documents</li>
+          <li>Lawyer practice history on similar matters</li>
+        </ul>
+      </article>
+    </section>
     <form class="form-card" method="post" action="/intake" enctype="multipart/form-data">
       <div class="form-grid">
         <label>
@@ -565,6 +618,23 @@ def render_lawyer_form(
     </section>
     {render_messages(success_message, "success")}
     {render_messages(errors, "error")}
+    <section class="two-column media-section">
+      <article class="card">
+        <h2>What improves your match score</h2>
+        <ul class="plain-list">
+          <li>Courts and states you actively serve</li>
+          <li>Clear specialties and working languages</li>
+          <li>Anonymized past matter summaries</li>
+          <li>Whether you are open to low-bono or pro bono work</li>
+        </ul>
+      </article>
+      {render_illustration_card(
+          "/static/lawyer-network.svg",
+          "Your experience becomes structured matching data",
+          "The platform converts practice areas, courts, profile copy, and case history into a feature graph for routing.",
+          tone="sage",
+      )}
+    </section>
     <form class="form-card" method="post" action="/lawyers/onboard">
       <div class="form-grid">
         <label>
@@ -714,6 +784,22 @@ def render_lawyer_directory(
       <p class="lead">
         Public discovery stays open, but confidential case documents remain protected behind account and role checks.
       </p>
+    </section>
+    <section class="two-column media-section">
+      {render_illustration_card(
+          "/static/community-justice.svg",
+          "Regional discovery without the portal feeling heavy",
+          "People can browse by state, bar council, issue type, and court before the platform handles deeper matching.",
+          tone="terracotta",
+      )}
+      <article class="card">
+        <h2>Directory filters that matter</h2>
+        <ul class="plain-list">
+          <li>State served and bar council registration</li>
+          <li>Practice area and court/forum level</li>
+          <li>Public profile summary and availability</li>
+        </ul>
+      </article>
     </section>
     <section class="filter-card">
       <form class="filter-grid" method="get" action="/lawyers">

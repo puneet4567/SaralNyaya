@@ -144,6 +144,10 @@ main {
   align-items: start;
 }
 
+.media-section {
+  margin-bottom: 24px;
+}
+
 .hero {
   grid-template-columns: 1.35fr 0.85fr;
   align-items: stretch;
@@ -172,6 +176,50 @@ main {
   display: grid;
   gap: 16px;
   padding: 22px;
+}
+
+.illustration-card {
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 243, 235, 0.95));
+}
+
+.tone-sage {
+  background:
+    radial-gradient(circle at top right, rgba(11, 107, 94, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(234, 246, 241, 0.92));
+}
+
+.tone-terracotta {
+  background:
+    radial-gradient(circle at top right, rgba(196, 109, 67, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 237, 229, 0.94));
+}
+
+.tone-sand {
+  background:
+    radial-gradient(circle at top right, rgba(196, 109, 67, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 239, 227, 0.94));
+}
+
+.illustration-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 23 / 18;
+  object-fit: cover;
+}
+
+.illustration-copy {
+  padding: 20px 22px 24px;
+}
+
+.illustration-copy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .eyebrow {
@@ -295,6 +343,11 @@ button.primary {
   padding-left: 18px;
   color: var(--muted);
   line-height: 1.7;
+}
+
+.auth-copy {
+  display: grid;
+  gap: 18px;
 }
 
 .form-header {
