@@ -95,6 +95,60 @@ Demo accounts:
 5. Dashboard: see the auto-match result and the reasons.
 6. Lawyer login: review assigned matters and download shared documents (permissioned access).
 
+## How AI-inspired matching works
+
+This portal currently uses an AI-inspired heuristic matching layer rather than an external LLM or embeddings API.
+
+For each applicant case, the system stores and scores:
+
+- issue summary
+- state / region
+- case category
+- court level
+- preferred language
+- uploaded document text
+
+For each lawyer, the system stores and scores:
+
+- states served
+- specialties
+- courts of practice
+- languages
+- fee model
+- profile bio
+- past case history
+
+The portal builds simple feature graphs and keyword signals for both sides, then ranks lawyers using overlap and rule-based scoring. Key signals include:
+
+- same state or service region
+- matching issue category
+- matching court / forum
+- preferred language match
+- overlap between applicant summary/documents and lawyer bio/past case history
+- pro bono / low bono preference
+- accepting status, declaration, and verification signals
+
+If the applicant has given permission to share the matter, the system can automatically assign the highest-ranked lawyer match. Admins can also review suggested lawyers and see the reasons behind the match.
+
+### Current approach vs future AI upgrade
+
+Current approach:
+
+- Uses rule-based scoring plus extracted keywords from the case summary, uploaded documents, lawyer bio, and lawyer past case history
+- Works well when the applicant and lawyer use similar terms such as "wage issue", "consumer grievance", or "documentation problem"
+- Keeps the system simple, explainable, and inexpensive to run locally
+
+Future AI upgrade:
+
+- Replace or supplement keyword overlap with embeddings / semantic search and model-based ranking
+- Understand similarity even when the applicant and lawyer use different wording for the same issue
+- Improve ranking quality for longer documents, mixed-language descriptions, and more complex legal fact patterns
+
+Example:
+
+- Current system: an applicant writes "salary not paid after termination" and uploads a notice. A lawyer profile that mentions "wage recovery", "termination dispute", or "labour tribunal" gets a strong score because the keywords and feature tags overlap.
+- Future AI system: an applicant writes "my company removed me and has not cleared dues" while the lawyer profile says "employment separation compensation disputes". Even without the same exact words, an embeddings-based matcher could understand that both refer to a similar labour recovery problem and rank that lawyer highly.
+
 ## Product assumptions in this MVP
 
 - Lawyer verification is self-attested by default
